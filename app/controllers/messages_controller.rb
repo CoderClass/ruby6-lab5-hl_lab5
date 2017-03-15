@@ -7,6 +7,7 @@ class MessagesController < ApplicationController
     @message = Message.new(message_params)
     if @message.save
       flash[:success] = 'Message sent'
+      ActionCable.server.broadcast("chat", message: render_message(@message))
       redirect_to root_path
     else
       flash[:error] = 'There is some problem'
@@ -18,6 +19,9 @@ class MessagesController < ApplicationController
   # def set_message
   #   @message = Message.find(params[:id])
   # end
+  def render_message(message)
+    ApplicationController.render(partial: 'messages/message', locals: {message: message})
+  end
 
   def message_params
     params.require(:message).permit(:body)
